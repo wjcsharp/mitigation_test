@@ -1,0 +1,86 @@
+#include <windows.h>
+#include <stdio.h>
+#include <crtdbg.h>
+#include "console_color.hpp"
+#pragma comment(lib, "dbghelp")
+
+struct _TEB
+{
+	NT_TIB Tib;
+};
+
+bool ImageIsRelocated( _In_ HMODULE module )
+{
+	WCHAR file_name[MAX_PATH];
+	GetModuleFileNameW( module, file_name, ARRAYSIZE( file_name ) );
+	HANDLE file = CreateFileW( file_name, FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr );
+	OVERLAPPED overlapped = {};
+	overlapped.Offset = FIELD_OFFSET( IMAGE_DOS_HEADER, e_lfanew );
+	ULONG e_lfanew;
+	ReadFile( file, &e_lfanew, sizeof( e_lfanew ), nullptr, &overlapped );
+	overlapped.Offset = e_lfanew + FIELD_OFFSET( IMAGE_NT_HEADERS, OptionalHeader );
+	IMAGE_OPTIONAL_HEADER optional_header;
+	ReadFile( file, &optional_header, sizeof( optional_header ), nullptr, &overlapped );
+	CloseHandle( file );
+	return reinterpret_cast<HMODULE>( optional_header.ImageBase ) != module;
+}
+#pragma warning(push)
+#pragma warning(disable:4996)
+BOOL PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
+{
+	BOOL run_under_wow64 = IsWow64Process( GetCurrentProcess(), &run_under_wow64 ) ? run_under_wow64 : FALSE;
+	DWORD windows_version = GetVersion();
+	switch( LOBYTE( LOWORD( windows_version ) ) )
+	{
+	case 6:
+		switch( HIBYTE( LOWORD( windows_version ) ) )
+		{
+		case 3:
+			__fallthrough;
+		case 2:
+			return stack_top != ( run_under_wow64 ? reinterpret_cast<PVOID>( 0x190000 ) : reinterpret_cast<PVOID>( 0x140000 ) );
+		case 1:
+			return stack_top != ( run_under_wow64 ? reinterpret_cast<PVOID>( 0x190000 ) : reinterpret_cast<PVOID>( 0x130000 ) );
+		case 0:
+			return stack_top != ( run_under_wow64 ? reinterpret_cast<PVOID>( 0x180000 ) : reinterpret_cast<PVOID>( 0x130000 ) );
+		default:
+			__fallthrough;
+		}
+	default:
+		__fallthrough;
+	}
+	return FALSE;
+}
+#pragma warning(pop)
+int __cdecl main()
+{
+	_CrtSetReportMode( _CRT_WARN, IsDebuggerPresent() ? _CRTDBG_MODE_DEBUG : _CRTDBG_MODE_FILE );
+	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
+	HMODULE exe_handle = GetModuleHandle( nullptr );
+	printf( "      EXE:" );
+	if( ImageIsRelocated( exe_handle ) )
+		printf_green( "%p\n", exe_handle );
+	else
+		printf( "%p\n", exe_handle );
+	PVOID stack_top = NtCurrentTeb()->Tib.StackBase;
+	printf( "Stack Top:" );
+	if( PrimaryThreadStackIsRandomized( stack_top ) )
+		printf_green( "%p\n", stack_top );
+	else
+		printf( "%p\n", stack_top );
+	static const WCHAR dlls[][2] = { L"A", L"B", L"C", L"D", L"E", L"F" };
+	for( int i = 0; i < ARRAYSIZE( dlls ); ++i )
+	{
+		HMODULE module = LoadLibraryW( dlls[i] );
+		printf( "%S:", dlls[i] );
+		if( module )
+			if( ImageIsRelocated( module ) )
+				printf_green( "%p", module );
+			else
+				printf( "%p", module );
+		else
+			printf_red( "null" );
+		printf( "  " );
+	}
+	puts( "" );
+}
