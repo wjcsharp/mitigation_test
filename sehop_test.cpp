@@ -3,7 +3,6 @@
 #endif
 #include <windows.h>
 #include <stdio.h>
-#include <crtdbg.h>
 #include "console_color.hpp"
 
 struct _TEB
@@ -34,8 +33,6 @@ void __declspec( noinline ) RaiseSEH()
 }
 int __cdecl main()
 {
-	_CrtSetReportMode( _CRT_WARN, IsDebuggerPresent() ? _CRTDBG_MODE_DEBUG : _CRTDBG_MODE_FILE );
-	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
 #ifndef NO_VEH
 	AddVectoredContinueHandler( 0, ExceptionRoutine );
 #endif

@@ -3,7 +3,6 @@
 #endif
 #include <windows.h>
 #include <cstdio>
-#include <crtdbg.h>
 #include "console_color.hpp"
 
 #pragma comment(linker, "/SECTION:.noexec,!E")
@@ -44,9 +43,6 @@ void PrintCurrentProcessDEPPolicy()
 }
 int __cdecl main()
 {
-	_CrtSetReportMode( _CRT_WARN, IsDebuggerPresent() ? _CRTDBG_MODE_DEBUG : _CRTDBG_MODE_FILE );
-	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
-
 	// Windows 8/8.1 bug workaround
 	const BYTE mov_edi_edi[2] = { 0x8B, 0xFF };
 	const BYTE xor_ecx_ecx[2] = { 0x33, 0xC9 };

@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <stdio.h>
-#include <crtdbg.h>
 #include "console_color.hpp"
 #pragma comment(lib, "dbghelp")
 
@@ -54,8 +53,6 @@ BOOL PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
 #pragma warning(pop)
 int __cdecl main()
 {
-	_CrtSetReportMode( _CRT_WARN, IsDebuggerPresent() ? _CRTDBG_MODE_DEBUG : _CRTDBG_MODE_FILE );
-	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
 	HMODULE exe_handle = GetModuleHandle( nullptr );
 	printf( "      EXE:" );
 	if( ImageIsRelocated( exe_handle ) )
