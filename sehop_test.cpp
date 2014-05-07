@@ -2,15 +2,11 @@
 #error SEHOP is x86 arch only.
 #endif
 #include <windows.h>
+#include <intrin.h>
 #include <stdio.h>
 #include "console_color.hpp"
 
-struct _TEB
-{
-	NT_TIB32 Tib;
-};
-
-LONG CALLBACK ExceptionRoutine( _In_ PEXCEPTION_POINTERS exception_information )
+LONG CALLBACK CatchUnhandledException( _In_ PEXCEPTION_POINTERS exception_information )
 {
 	if( exception_information->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT )
 	{
@@ -19,23 +15,22 @@ LONG CALLBACK ExceptionRoutine( _In_ PEXCEPTION_POINTERS exception_information )
 	}
 	return EXCEPTION_CONTINUE_SEARCH;
 }
-void __declspec( noinline ) RaiseSEH()
+EXTERN_C EXCEPTION_DISPOSITION __cdecl ExceptionRoutine( _In_ EXCEPTION_RECORD, _In_ PVOID, _Inout_ PCONTEXT, _Inout_ PVOID )
 {
-	printf( "SEHOP " );
-	__try
-	{
-		__debugbreak();
-	}
-	__except( GetExceptionCode() == EXCEPTION_BREAKPOINT ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH )
-	{
-		puts_red( "Disable" );
-	}
+	puts_red( "Disable" );
+	ExitProcess( EXIT_SUCCESS );
 }
+#pragma warning(push)
+#pragma warning(disable:4733)
 int __cdecl main()
 {
 #ifndef NO_VEH
-	AddVectoredContinueHandler( 0, ExceptionRoutine );
+	AddVectoredContinueHandler( 0, CatchUnhandledException );
 #endif
-	NtCurrentTeb()->Tib.ExceptionList = ULONG_MAX;
-	RaiseSEH();
+	printf( "SEHOP " );
+	DWORD ExceptionRecord[2] = { ULONG_MAX, PtrToUlong( ExceptionRoutine ) };
+	__writefsdword( FIELD_OFFSET( NT_TIB, ExceptionList ), PtrToUlong( &ExceptionRecord ) );
+	RaiseException( EXCEPTION_BREAKPOINT, EXCEPTION_NONCONTINUABLE, 0, nullptr );
+	__assume( 0 );
 }
+#pragma warning(pop)

@@ -52,7 +52,7 @@ int __cdecl main()
 		fputs( "GetProcessDEPPolicy() entry point is not \"MOV EDI, EDI\"\n", stderr );
 
 	PrintCurrentProcessDEPPolicy();
-	// Vb40032.dll can get from http://support.microsoft.com/kb/196286
+	// Vb40032.dll http://support.microsoft.com/kb/196286
 	if( LoadLibraryW( L"vb40032" ) )
 	{
 		puts( "NX incompatible DLL load" );
@@ -84,7 +84,7 @@ LONG CALLBACK NXHandler( _Inout_ PEXCEPTION_POINTERS exception_information )
 		ChangeConsoleTextColor color( FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY );
 		WriteConsoleA( GetStdHandle( STD_OUTPUT_HANDLE ), str, strlen( str ), &junk, NULL );
 		RemoveVectoredExceptionHandler( NXHandler );
-		exception_information->ContextRecord->Eip = reinterpret_cast<DWORD>( mainCRTStartup );
+		exception_information->ContextRecord->Eip = PtrToUlong( mainCRTStartup );
 		return EXCEPTION_CONTINUE_EXECUTION;
 	}
 	else

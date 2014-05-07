@@ -1,6 +1,6 @@
 @echo off
 setlocal
-path %PATH%;%ProgramFiles(x86)%\EMET 5.0;%ProgramFiles%\EMET 5.0;%ProgramFiles(x86)%\EMET 4.1;%ProgramFiles%\EMET 4.1;%PATH%;%ProgramFiles(x86)%\EMET 4.0;%ProgramFiles%\EMET 4.0
+path %PATH%;%ProgramFiles(x86)%\EMET 5.0;%ProgramFiles%\EMET 5.0;%ProgramFiles(x86)%\EMET 4.1;%ProgramFiles%\EMET 4.1;%PATH%;%ProgramFiles(x86)%\EMET 4.0;%ProgramFiles%\EMET 4.0;%ProgramFiles(x86)%\EMET;%ProgramFiles%\EMET
 pushd %~dp0
 reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v MitigationOptions 2> nul
 reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableExceptionChainValidation 2> nul

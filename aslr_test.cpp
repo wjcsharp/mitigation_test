@@ -15,13 +15,13 @@ bool ImageIsRelocated( _In_ HMODULE module )
 	HANDLE file = CreateFileW( file_name, FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr );
 	OVERLAPPED overlapped = {};
 	overlapped.Offset = FIELD_OFFSET( IMAGE_DOS_HEADER, e_lfanew );
-	ULONG e_lfanew;
+	decltype( IMAGE_DOS_HEADER::e_lfanew ) e_lfanew;
 	ReadFile( file, &e_lfanew, sizeof( e_lfanew ), nullptr, &overlapped );
-	overlapped.Offset = e_lfanew + FIELD_OFFSET( IMAGE_NT_HEADERS, OptionalHeader );
-	IMAGE_OPTIONAL_HEADER optional_header;
-	ReadFile( file, &optional_header, sizeof( optional_header ), nullptr, &overlapped );
+	overlapped.Offset = e_lfanew + FIELD_OFFSET( IMAGE_NT_HEADERS, OptionalHeader ) + FIELD_OFFSET( decltype( IMAGE_NT_HEADERS::OptionalHeader ), ImageBase );
+	decltype( decltype( IMAGE_NT_HEADERS::OptionalHeader )::ImageBase ) ImageBase;
+	ReadFile( file, &ImageBase, sizeof( ImageBase ), nullptr, &overlapped );
 	CloseHandle( file );
-	return reinterpret_cast<HMODULE>( optional_header.ImageBase ) != module;
+	return reinterpret_cast<HMODULE>( ImageBase ) != module;
 }
 #pragma warning(push)
 #pragma warning(disable:4996)
@@ -37,11 +37,11 @@ BOOL PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
 		case 3:
 			__fallthrough;
 		case 2:
-			return stack_top != ( run_under_wow64 ? reinterpret_cast<PVOID>( 0x190000 ) : reinterpret_cast<PVOID>( 0x140000 ) );
+			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x140000 ) );
 		case 1:
-			return stack_top != ( run_under_wow64 ? reinterpret_cast<PVOID>( 0x190000 ) : reinterpret_cast<PVOID>( 0x130000 ) );
+			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x130000 ) );
 		case 0:
-			return stack_top != ( run_under_wow64 ? reinterpret_cast<PVOID>( 0x180000 ) : reinterpret_cast<PVOID>( 0x130000 ) );
+			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x180000 ) : ULongToPtr( 0x130000 ) );
 		default:
 			__fallthrough;
 		}

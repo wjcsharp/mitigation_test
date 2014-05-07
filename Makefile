@@ -1,3 +1,4 @@
+AFLAGS = /safeseh
 CPPFLAGS = /nologo /GR- /MD /O2y- /Zi
 LFLAGS = /nologo /DEBUG /INCREMENTAL:NO /MANIFEST:NO /RELEASE
 
@@ -12,9 +13,9 @@ dep_test_nxcompat.exe: dep_test.obj
 	link $** $(LFLAGS) /OUT:$(@F) /NXCOMPAT
 
 sehop_test: sehop_test_nt60.exe sehop_test_nt62.exe
-sehop_test_nt60.exe: sehop_test.obj
+sehop_test_nt60.exe: sehop_test.obj safeseh.obj
 	link $** $(LFLAGS) /OUT:$(@F) /SUBSYSTEM:CONSOLE,6.0
-sehop_test_nt62.exe: sehop_test.obj
+sehop_test_nt62.exe: sehop_test.obj safeseh.obj
 	link $** $(LFLAGS) /OUT:$(@F) /SUBSYSTEM:CONSOLE,6.2
 
 aslr_test: A.dll B.dll C.dll D.dll E.dll F.dll aslr_test_fixed.exe aslr_test_reloc.exe aslr_test_dynamic.exe
