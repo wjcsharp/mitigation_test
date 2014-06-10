@@ -3,8 +3,8 @@
 #pragma comment(lib, "kernel32")
 #pragma comment(linker, "/Entry:DllMain")
 
-#pragma optimize( "t", on )
-BOOL APIENTRY DllMain( _In_ HMODULE hModule, DWORD ul_reason_for_call, _In_opt_ LPVOID lpReserved )
+#pragma optimize( "ty", on )
+BOOL APIENTRY DllMain( _In_ HMODULE hModule, DWORD ul_reason_for_call, _In_opt_ LPVOID load_time_loading )
 {
 	switch( ul_reason_for_call )
 	{
@@ -16,10 +16,6 @@ BOOL APIENTRY DllMain( _In_ HMODULE hModule, DWORD ul_reason_for_call, _In_opt_ 
 	case DLL_THREAD_DETACH:
 		break;
 	case DLL_PROCESS_DETACH:
-		if( lpReserved == NULL )
-		{
-			__noop;
-		}
 		break;
 	DEFAULT_UNREACHABLE;
 	}

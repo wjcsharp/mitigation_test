@@ -1,13 +1,9 @@
 #include <windows.h>
-#include <stdio.h>
-#include "console_color.hpp"
-#pragma comment(lib, "dbghelp")
 
-struct _TEB
-{
-	NT_TIB Tib;
-};
-
+/**
+	`module::IMAGE_NT_HEADERS::OptionalHeader::ImageBase == module` can't use.
+	VC++ made ASLR aware DLL's ImageBase is in relocation infomation.
+*/
 bool ImageIsRelocated( _In_ HMODULE module )
 {
 	WCHAR file_name[MAX_PATH];
@@ -25,7 +21,7 @@ bool ImageIsRelocated( _In_ HMODULE module )
 }
 #pragma warning(push)
 #pragma warning(disable:4996)
-BOOL PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
+bool PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
 {
 	BOOL run_under_wow64 = IsWow64Process( GetCurrentProcess(), &run_under_wow64 ) ? run_under_wow64 : FALSE;
 	DWORD windows_version = GetVersion();
@@ -35,7 +31,7 @@ BOOL PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
 		switch( HIBYTE( LOWORD( windows_version ) ) )
 		{
 		case 3:
-			__fallthrough;
+			__fallthrough;// Windows 8.1 use same address as Windows 8.
 		case 2:
 			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x140000 ) );
 		case 1:
@@ -48,36 +44,6 @@ BOOL PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
 	default:
 		__fallthrough;
 	}
-	return FALSE;
+	return false;
 }
 #pragma warning(pop)
-int __cdecl main()
-{
-	HMODULE exe_handle = GetModuleHandle( nullptr );
-	printf( "      EXE:" );
-	if( ImageIsRelocated( exe_handle ) )
-		printf_green( "%p\n", exe_handle );
-	else
-		printf( "%p\n", exe_handle );
-	PVOID stack_top = NtCurrentTeb()->Tib.StackBase;
-	printf( "Stack Top:" );
-	if( PrimaryThreadStackIsRandomized( stack_top ) )
-		printf_green( "%p\n", stack_top );
-	else
-		printf( "%p\n", stack_top );
-	static const WCHAR dlls[][2] = { L"A", L"B", L"C", L"D", L"E", L"F" };
-	for( int i = 0; i < ARRAYSIZE( dlls ); ++i )
-	{
-		HMODULE module = LoadLibraryW( dlls[i] );
-		printf( "%S:", dlls[i] );
-		if( module )
-			if( ImageIsRelocated( module ) )
-				printf_green( "%p", module );
-			else
-				printf( "%p", module );
-		else
-			printf_red( "null" );
-		printf( "  " );
-	}
-	puts( "" );
-}

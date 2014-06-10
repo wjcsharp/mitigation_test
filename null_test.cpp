@@ -18,8 +18,8 @@ EXTERN_C NTSYSAPI NTSTATUS NTAPI ZwAllocateVirtualMemory(
 	);
 int __cdecl main()
 {
-	PVOID address = reinterpret_cast<PVOID>( 1 );
-	SIZE_T length = 0x200;
+	PVOID address = ULongToPtr( 1 );
+	SIZE_T length = 512;
 	NTSTATUS status = ZwAllocateVirtualMemory( GetCurrentProcess(), &address, 0, &length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE );
 	if( NT_SUCCESS( status ) )
 	{
