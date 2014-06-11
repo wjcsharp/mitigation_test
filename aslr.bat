@@ -8,12 +8,12 @@ for %%f in (aslr_*.exe) do (
 reg add "HKCU\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ExcludedApplications" /v %%f /t REG_DWORD /d 1 /f > nul 2> nul
 echo ^	%%f
 %%f
-for %%i in (0x100 0x200 0x300) do (
+for %%i in (0x100 0x200 0x300 0x500 0x600 0x700) do (
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /v MitigationOptions /t REG_QWORD /d %%i /f > nul
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /v MitigationOptions 2> nul
 %%f
 if !ERRORLEVEL!==-1073741207 echo Process Creation failed
-EMET_Conf.exe --set %%f +DEP +SEHOP +MandatoryASLR > nul 2> nul && (
+EMET_Conf.exe --set %%f +SEHOP -MandatoryASLR > nul 2> nul && (
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /v MitigationOptions 2> nul
 %%f
 EMET_Conf.exe --delete %%f > nul
