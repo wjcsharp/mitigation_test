@@ -23,8 +23,8 @@ int __cdecl main()
 	NTSTATUS status = ZwAllocateVirtualMemory( GetCurrentProcess(), &address, 0, &length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE );
 	if( NT_SUCCESS( status ) )
 	{
-		*reinterpret_cast<volatile int*>( 0 ) = 0;
-		puts_red( strcpy( reinterpret_cast<char*>( 1 ), "null page allocated" ) );
+		*static_cast<volatile int*>( ULongToPtr( 0 ) ) = 0;
+		puts_red( strcpy( static_cast<char*>( ULongToPtr( 1 ) ), "null page allocated" ) );
 	}
 	else switch( status )
 	{

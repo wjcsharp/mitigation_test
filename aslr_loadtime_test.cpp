@@ -1,6 +1,9 @@
 #include <windows.h>
+#define PSAPI_VERSION 1
+#include <psapi.h>
 #include <stdio.h>
 #include "console_color.hpp"
+#pragma comment(lib, "psapi")
 
 struct _TEB
 {
@@ -9,39 +12,38 @@ struct _TEB
 
 bool ImageIsRelocated( _In_ HMODULE module );
 bool PrimaryThreadStackIsRandomized( _In_ PVOID stack_top );
+__declspec( dllimport ) int dllimport;
 int __cdecl main()
 {
-	HMODULE exe_handle = GetModuleHandle( nullptr );
-	printf( "      EXE:" );
-	if( ImageIsRelocated( exe_handle ) )
-		printf_green( "%p\n", exe_handle );
-	else
-		printf( "%p\n", exe_handle );
 	PVOID stack_top = NtCurrentTeb()->Tib.StackBase;
-	printf( "Stack Top:" );
+	fputs( "Stack Top:", stdout );
 	if( PrimaryThreadStackIsRandomized( stack_top ) )
-		printf_green( "%p\n", stack_top );
+		printf_green( "%p", stack_top );
 	else
-		printf( "%p\n", stack_top );
-	const PCWSTR dlls[] = { L"DLL_aslraware", L"DLL_relocatable", L"DLL_fixed" };
-	for( int i = 0; i < ARRAYSIZE( dlls ); ++i )
-	{
-		HMODULE module = GetModuleHandleW( dlls[i] );
-		printf( "%S:", dlls[i] );
-		if( module )
-			if( ImageIsRelocated( module ) )
-				printf_green( "%p", module );
-			else
-				printf( "%p", module );
+		printf( "%p", stack_top );
+	fputs( " ", stdout );
+
+	HMODULE exe_handle = GetModuleHandle( nullptr );
+	fputs( "EXE:", stdout );
+	if( ImageIsRelocated( exe_handle ) )
+		printf_green( "%p", exe_handle );
+	else
+		printf( "%p", exe_handle );
+	fputs( " ", stdout );
+
+	HMODULE module;
+	if( !GetModuleHandleExW( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<PCWSTR>( &dllimport ), &module ) )
+		abort();
+	WCHAR dll[MAX_PATH];
+	if( !GetModuleBaseNameW( GetCurrentProcess(), module, dll, ARRAYSIZE( dll ) ) )
+		abort();
+	printf( "%S:", dll );
+	if( module )
+		if( ImageIsRelocated( module ) )
+			printf_green( "%p", module );
 		else
-			printf_red( "null" );
-		printf( "  " );
-	}
+			printf( "%p", module );
+	else
+		abort();
 	puts( "" );
 }
-__declspec( dllimport ) int fixed;
-int imp_fixed = fixed;
-__declspec( dllimport ) int reloc;
-int imp_reloc = reloc;
-__declspec( dllimport ) int dynamic;
-int imp_dynamic = dynamic;

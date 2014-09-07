@@ -12,21 +12,24 @@ bool PrimaryThreadStackIsRandomized( _In_ PVOID stack_top );
 int __cdecl main()
 {
 	HMODULE exe_handle = GetModuleHandle( nullptr );
-	printf( "      EXE:" );
+	fputs( "      EXE:", stdout );
 	if( ImageIsRelocated( exe_handle ) )
 		printf_green( "%p\n", exe_handle );
 	else
 		printf( "%p\n", exe_handle );
+
 	PVOID stack_top = NtCurrentTeb()->Tib.StackBase;
-	printf( "Stack Top:" );
+	fputs( "Stack Top:", stdout );
 	if( PrimaryThreadStackIsRandomized( stack_top ) )
 		printf_green( "%p\n", stack_top );
 	else
 		printf( "%p\n", stack_top );
+
 	const PCWSTR dlls[] = { L"DLL_aslraware", L"DLL_relocatable", L"DLL_fixed" };
 	for( int i = 0; i < ARRAYSIZE( dlls ); ++i )
 	{
 		HMODULE module = LoadLibraryW( dlls[i] );
+		DWORD error = GetLastError();
 		printf( "%S:", dlls[i] );
 		if( module )
 			if( ImageIsRelocated( module ) )
@@ -34,8 +37,8 @@ int __cdecl main()
 			else
 				printf( "%p", module );
 		else
-			printf_red( "null" );
-		printf( "  " );
+			printf_red( "@err=%08lx", error );
+		fputs( "  ", stdout );
 	}
 	puts( "" );
 }

@@ -1,0 +1,10 @@
+dep_test: dep_test_nxcompat.exe dep_test_nocompat.exe dep_test_incompat.exe
+
+dep_test_incompat.exe: dep_test.obj
+	link $** $(LFLAGS) /OUT:$(@F) /NXCOMPAT:NO /ENTRY:NXViolationStartup
+
+dep_test_nocompat.exe: dep_test.obj
+	link $** $(LFLAGS) /OUT:$(@F) /NXCOMPAT:NO
+
+dep_test_nxcompat.exe: dep_test.obj
+	link $** $(LFLAGS) /OUT:$(@F) /NXCOMPAT

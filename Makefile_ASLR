@@ -1,0 +1,27 @@
+aslr_test: aslr_dll aslr_runtime aslr_loadtime
+
+aslr_runtime: aslr_runtime_test_fixed.exe aslr_runtime_test_reloc.exe aslr_runtime_test_dynamic.exe
+aslr_runtime_test_fixed.exe: aslr_runtime_test.obj aslr_impl.obj
+	link $** $(LFLAGS) /OUT:$(@F) /FIXED
+aslr_runtime_test_reloc.exe: aslr_runtime_test.obj aslr_impl.obj
+	link $** $(LFLAGS) /OUT:$(@F) /DYNAMICBASE:NO /FIXED:NO
+aslr_runtime_test_dynamic.exe: aslr_runtime_test.obj aslr_impl.obj
+	link $** $(LFLAGS) /OUT:$(@F) /DYNAMICBASE
+
+aslr_loadtime: aslr_dll aslr_loadtime_test_fixed.exe aslr_loadtime_test_reloc.exe aslr_loadtime_test_dynamic.exe
+aslr_loadtime_test_fixed.exe: aslr_loadtime_test.obj aslr_impl.obj DLL_aslr.lib
+	link $** $(LFLAGS) /OUT:$(@F) /FIXED
+aslr_loadtime_test_reloc.exe: aslr_loadtime_test.obj aslr_impl.obj DLL_aslr.lib
+	link $** $(LFLAGS) /OUT:$(@F) /DYNAMICBASE:NO /FIXED:NO
+aslr_loadtime_test_dynamic.exe: aslr_loadtime_test.obj aslr_impl.obj DLL_aslr.lib
+	link $** $(LFLAGS) /OUT:$(@F) /DYNAMICBASE
+
+aslr_dll: DLL_aslr.dll DLL_aslraware.dll DLL_relocatable.dll DLL_fixed.dll
+DLL_aslr.dll: DLL_aslr.obj
+	link /nologo $** /DLL /OUT:$(@F)
+DLL_fixed.dll: DLL_aslr.obj
+	link /nologo $** /DLL /OUT:$(@F) /FIXED /BASE:0x40000000
+DLL_relocatable.dll: DLL_aslr.obj
+	link /nologo $** /DLL /OUT:$(@F) /DYNAMICBASE:NO /BASE:0x30000000
+DLL_aslraware.dll: DLL_aslr.obj
+	link /nologo $** /DLL /OUT:$(@F) /DYNAMICBASE /BASE:0x20000000

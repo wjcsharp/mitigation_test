@@ -46,8 +46,8 @@ int __cdecl main()
 	// Windows 8/8.1 bug workaround
 	const BYTE mov_edi_edi[2] = { 0x8B, 0xFF };
 	const BYTE xor_ecx_ecx[2] = { 0x33, 0xC9 };
-	if( memcmp( GetProcessDEPPolicy, mov_edi_edi, sizeof( mov_edi_edi ) ) == 0 )
-		WriteProcessMemory( GetCurrentProcess(), GetProcessDEPPolicy, xor_ecx_ecx, sizeof( xor_ecx_ecx ), NULL );
+	if( memcmp( GetProcessDEPPolicy, mov_edi_edi, sizeof mov_edi_edi ) == 0 )
+		WriteProcessMemory( GetCurrentProcess(), GetProcessDEPPolicy, xor_ecx_ecx, sizeof xor_ecx_ecx, NULL );
 	else
 		fputs( "GetProcessDEPPolicy() entry point is not \"MOV EDI, EDI\"\n", stderr );
 
@@ -71,6 +71,7 @@ int __cdecl main()
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 LONG CALLBACK NXHandler( _Inout_ PEXCEPTION_POINTERS exception_information )
 {
+	RemoveVectoredExceptionHandler( NXHandler );
 	ULONG_PTR base = reinterpret_cast<ULONG_PTR>( &__ImageBase );
 	PIMAGE_NT_HEADERS nt_header = reinterpret_cast<PIMAGE_NT_HEADERS>( base + ( &__ImageBase )->e_lfanew );
 	if(
@@ -83,7 +84,6 @@ LONG CALLBACK NXHandler( _Inout_ PEXCEPTION_POINTERS exception_information )
 		DWORD junk;
 		ChangeConsoleTextColor color( FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY );
 		WriteConsoleA( GetStdHandle( STD_OUTPUT_HANDLE ), str, strlen( str ), &junk, NULL );
-		RemoveVectoredExceptionHandler( NXHandler );
 		exception_information->ContextRecord->Eip = PtrToUlong( mainCRTStartup );
 		return EXCEPTION_CONTINUE_EXECUTION;
 	}
@@ -103,11 +103,11 @@ VOID NTAPI SetupNXHandler( PVOID, DWORD Reason, PVOID )
 		break;
 	case DLL_THREAD_DETACH:
 		break;
-		DEFAULT_UNREACHABLE;
+	DEFAULT_UNREACHABLE;
 	}
 }
 #pragma comment(linker, "/INCLUDE:__tls_used")
 #pragma const_seg(".CRT$XLB")
 extern const PIMAGE_TLS_CALLBACK XLB = SetupNXHandler;
 #pragma comment(lib, "user32")
-#pragma comment(linker, "/INCLUDE:_CopyRect@8") // Some Windows versions, user32.dll is needed for TLS callback.
+#pragma comment(linker, "/INCLUDE:_CopyRect@8") // Some Windows versions, user32.dll is needed for TLS callback. I don't know this reason.

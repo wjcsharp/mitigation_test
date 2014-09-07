@@ -27,7 +27,7 @@ int __cdecl main()
 #ifndef NO_VEH
 	AddVectoredContinueHandler( 0, CatchUnhandledException );
 #endif
-	printf( "SEHOP " );
+	fputs( "SEHOP ", stdout );
 	DWORD ExceptionRecord[2] = { ULONG_MAX, PtrToUlong( ExceptionRoutine ) };
 	__writefsdword( FIELD_OFFSET( NT_TIB, ExceptionList ), PtrToUlong( &ExceptionRecord ) );
 	RaiseException( EXCEPTION_BREAKPOINT, EXCEPTION_NONCONTINUABLE, 0, nullptr );

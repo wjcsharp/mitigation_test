@@ -1,0 +1,7 @@
+sehop_test: sehop_test_nt60.exe sehop_test_nt62.exe
+
+sehop_test_nt60.exe: sehop_test.obj safeseh.obj
+	link $** $(LFLAGS) /OUT:$(@F) /SUBSYSTEM:CONSOLE,6.0
+
+sehop_test_nt62.exe: sehop_test.obj safeseh.obj
+	link $** $(LFLAGS) /OUT:$(@F) /SUBSYSTEM:CONSOLE,6.2
