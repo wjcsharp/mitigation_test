@@ -49,6 +49,7 @@ vc*.pdb
 *.nativecodeanalysis.xml
 *.cod
 *.exp
+*.lib
 
 # Visual C++ cache files
 ipch/

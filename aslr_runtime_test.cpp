@@ -37,7 +37,7 @@ int __cdecl main()
 			else
 				printf( "%p", module );
 		else
-			printf_red( "@err=%08lx", error );
+			printf_red( "$err=%08lx", error );
 		fputs( "  ", stdout );
 	}
 	puts( "" );

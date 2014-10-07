@@ -18,10 +18,10 @@ aslr_loadtime_test_dynamic.exe: aslr_loadtime_test.obj aslr_impl.obj DLL_aslr.li
 
 aslr_dll: DLL_aslr.dll DLL_aslraware.dll DLL_relocatable.dll DLL_fixed.dll
 DLL_aslr.dll: DLL_aslr.obj
-	link /nologo $** /DLL /OUT:$(@F)
+	link $** /DLL /OUT:$(@F)
 DLL_fixed.dll: DLL_aslr.obj
-	link /nologo $** /DLL /OUT:$(@F) /FIXED /BASE:0x40000000
+	link $** /DLL /OUT:$(@F) /FIXED /BASE:0x40000000
 DLL_relocatable.dll: DLL_aslr.obj
-	link /nologo $** /DLL /OUT:$(@F) /DYNAMICBASE:NO /BASE:0x30000000
+	link $** /DLL /OUT:$(@F) /DYNAMICBASE:NO /BASE:0x30000000
 DLL_aslraware.dll: DLL_aslr.obj
-	link /nologo $** /DLL /OUT:$(@F) /DYNAMICBASE /BASE:0x20000000
+	link $** /DLL /OUT:$(@F) /DYNAMICBASE /BASE:0x20000000

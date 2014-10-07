@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <versionhelpers.h>
 
 /**
 	`module::IMAGE_NT_HEADERS::OptionalHeader::ImageBase == module` can't use.
@@ -27,29 +28,19 @@ bool ImageIsRelocated( _In_ HMODULE module )
 bool PrimaryThreadStackIsRandomized( _In_ PVOID stack_top )
 {
 	BOOL run_under_wow64 = IsWow64Process( GetCurrentProcess(), &run_under_wow64 ) ? run_under_wow64 : FALSE;
-#pragma warning(push)
-#pragma warning(disable:4996)
-#pragma warning(disable:28159)
-	DWORD windows_version = GetVersion();
-#pragma warning(pop)
-	switch( LOBYTE( LOWORD( windows_version ) ) )
-	{
-	case 6:
-		switch( HIBYTE( LOWORD( windows_version ) ) )
-		{
-		case 3:
-			__fallthrough;// Windows 8.1 use same address as Windows 8.
-		case 2:
-			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x140000 ) );
-		case 1:
-			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x130000 ) );
-		case 0:
-			return stack_top != ( run_under_wow64 ? ULongToPtr( 0x180000 ) : ULongToPtr( 0x130000 ) );
-		default:
-			__fallthrough;
-		}
-	default:
-		__fallthrough;
-	}
+
+	if( IsWindowsVersionOrGreater( 6, 4, 0 ) )
+		return stack_top != ( run_under_wow64 ? ULongToPtr( 0x1A0000 ) : ULongToPtr( 0x150000 ) );
+
+	// Windows 8.1(6, 3) use same address as Windows 8(6, 2).
+	if( IsWindowsVersionOrGreater( 6, 2, 0 ) )
+		return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x140000 ) );
+
+	if( IsWindowsVersionOrGreater( 6, 1, 0 ) )
+		return stack_top != ( run_under_wow64 ? ULongToPtr( 0x190000 ) : ULongToPtr( 0x130000 ) );
+
+	if( IsWindowsVersionOrGreater( 6, 0, 0 ) )
+		return stack_top != ( run_under_wow64 ? ULongToPtr( 0x180000 ) : ULongToPtr( 0x130000 ) );
+
 	return false;
 }

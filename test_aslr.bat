@@ -12,16 +12,16 @@ reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v Miti
 
 for %%f in (aslr_runtime_*.exe) do (
 	reg add "HKCU\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ExcludedApplications" /v %%f /t REG_DWORD /d 1 /f > nul 2> nul
-	echo ^	%%f
-	%%f
-	EMET_Conf.exe --set %%f +MandatoryASLR > nul 2> nul && (
-		echo ^	%%f EMET applied +
+	EMET_Conf.exe --set %%f -MandatoryASLR > nul 2> nul && (
+		echo ^	%%f EMET applied -
 		%%f
 		EMET_Conf.exe --delete %%f > nul
 		reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /f > nul 2> nul
 	)
-	EMET_Conf.exe --set %%f -MandatoryASLR > nul 2> nul && (
-		echo ^	%%f EMET applied -
+	echo ^	%%f
+	%%f
+	EMET_Conf.exe --set %%f +MandatoryASLR > nul 2> nul && (
+		echo ^	%%f EMET applied +
 		%%f
 		EMET_Conf.exe --delete %%f > nul
 		reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /f > nul 2> nul
@@ -34,16 +34,16 @@ for %%f in (aslr_loadtime_*.exe) do (
 	reg add "HKCU\SOFTWARE\Microsoft\Windows\Windows Error Reporting\ExcludedApplications" /v %%f /t REG_DWORD /d 1 /f > nul 2> nul
 	for %%d in (DLL_aslraware.dll DLL_relocatable.dll DLL_fixed.dll) do (
 		copy /y %%d DLL_aslr.dll > nul
-		echo ^	%%f^(%%d^)
-		%%f
-		EMET_Conf.exe --set %%f +MandatoryASLR > nul 2> nul && (
-			echo ^	%%f^(%%d^) EMET applied +
+		EMET_Conf.exe --set %%f -MandatoryASLR > nul 2> nul && (
+			echo ^	%%f^(%%d^) EMET applied -
 			%%f
 			EMET_Conf.exe --delete %%f > nul
 			reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /f > nul 2> nul
 		)
-		EMET_Conf.exe --set %%f -MandatoryASLR > nul 2> nul && (
-			echo ^	%%f^(%%d^) EMET applied -
+		echo ^	%%f^(%%d^)
+		%%f
+		EMET_Conf.exe --set %%f +MandatoryASLR > nul 2> nul && (
+			echo ^	%%f^(%%d^) EMET applied +
 			%%f
 			EMET_Conf.exe --delete %%f > nul
 			reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%%f" /f > nul 2> nul
