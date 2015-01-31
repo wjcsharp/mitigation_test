@@ -5,6 +5,7 @@ path %PATH%;%ProgramFiles(x86)%\EMET;%ProgramFiles%\EMET
 path %PATH%;%ProgramFiles(x86)%\EMET 4.0;%ProgramFiles%\EMET 4.0
 path %PATH%;%ProgramFiles(x86)%\EMET 4.1;%ProgramFiles%\EMET 4.1
 path %PATH%;%ProgramFiles(x86)%\EMET 5.0;%ProgramFiles%\EMET 5.0
+path %PATH%;%ProgramFiles(x86)%\EMET 5.1;%ProgramFiles%\EMET 5.1
 
 pushd %~dp0
 reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v MoveImages 2> nul
